@@ -2,6 +2,8 @@
 
 ## Developing
 
+### Starting postgres
+
 Start up postgres.  There's a script to make it easy for you, but you can use whatever you want if you prefer something else.  Just update the username/password in `config/dev.exs`)
 
 ```sh
@@ -13,6 +15,14 @@ If you would like a `psql` prompt on that database, use the script:
 ```sh
 ./scripts/psql.sh
 ```
+
+### Seeding your first user
+
+  * Install dependencies with `mix deps.get`
+  * Edit `priv/repo/seeds.exs` with data you prefer
+  * Run it with `mix run priv/repo/seeds.exs`
+
+### Starting the server
 
 To start your Phoenix server:
 
