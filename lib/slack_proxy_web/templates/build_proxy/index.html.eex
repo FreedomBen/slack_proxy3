@@ -1,0 +1,45 @@
+<h2>Listing Build proxies</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Channel</th>
+      <th>Username</th>
+      <th>Avatar</th>
+      <th>Abbreviate</th>
+      <th>Disabled</th>
+      <th>Api token</th>
+      <th>Service base url</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for build_proxy <- @build_proxies do %>
+    <tr>
+      <td><%= build_proxy.id %></td>
+      <td><%= build_proxy.channel %></td>
+      <td><%= shorten(build_proxy.username, 20) %></td>
+      <td><%= build_proxy.avatar %></td>
+      <td><%= build_proxy.abbreviate %></td>
+      <td><%= build_proxy.disabled %></td>
+      <td><%= shorten(build_proxy.api_token, 7) %></td>
+      <td><%= shorten(build_proxy.service_base_url, 10) %></td>
+
+      <td class="text-right">
+        <span><%= link "Show", to: build_proxy_path(@conn, :show, build_proxy), class: "btn btn-default btn-xs" %></span>
+
+        <%= if @current_user.is_admin do %>
+          <span><%= link "Edit", to: build_proxy_path(@conn, :edit, build_proxy), class: "btn btn-default btn-xs" %></span>
+          <span><%= link "Delete", to: build_proxy_path(@conn, :delete, build_proxy), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+        <% end %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<%= if @current_user.is_admin do %>
+  <span><%= link "New Build proxy", to: build_proxy_path(@conn, :new) %></span>
+<% end %>

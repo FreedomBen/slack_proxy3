@@ -1,0 +1,191 @@
+<h2>Build proxy <%= @build_proxy.id %></h2>
+
+<ul>
+
+  <li>
+    <strong>ID:</strong>
+    <%= @build_proxy.id %>
+  </li>
+
+  <li>
+    <strong>Avatar:</strong>
+    <%= @build_proxy.avatar %>
+  </li>
+
+  <li>
+    <strong>Channel:</strong>
+    <%= @build_proxy.channel %>
+  </li>
+
+  <li>
+    <strong>Username:</strong>
+    <%= @build_proxy.username %>
+  </li>
+
+  <li>
+    <strong>Api token:</strong>
+    <pre><%= @build_proxy.api_token %></pre>
+  </li>
+
+  <li>
+    <strong>Service base url:</strong>
+    <%= @build_proxy.service_base_url %>
+  </li>
+
+</ul>
+
+<h4>Testing from the CLI:</h4>
+<p>You can test the configuration manually by running this command (sub your own values where appropriate):</p>
+
+<pre>
+curl \
+  --data "api_token=<%= @build_proxy.api_token %>" \
+  --data "user=<%= @current_user.username %>" \
+  --data "author=<%= @current_user.username %>" \
+  --data "branch=test-branch" \
+  --data "failed=false" \
+  --data "title=Test title for a commit" \
+  --data "pipeline_id=pipeline_id" \
+  --data "job_id=job_id" \
+  --data "project_url=<%= @build_proxy.service_base_url %>" \
+  --data "mr_id=mr_id" \
+  'https://slack-proxy3.herokuapp.com/build_proxies/<%= @build_proxy.id %>/buildcomplete'
+</pre>
+
+<h4>Adding to the CI build:</h4>
+
+<p>
+  Here is a complete example script that you can invoke at the end of your CI build.
+  The variables that are expected to pre-exist are injected by Gitlab CI:
+</p>
+
+<p><strong>Build complete:</strong></p>
+
+<pre>
+#!/usr/bin/env sh
+
+API_TOKEN='<%= @build_proxy.api_token %>'
+
+BRANCH="${CI_COMMIT_REF_NAME}"
+FAILED='false'
+
+peace_out ()
+{
+  # make exit status match pass/fail results to maintain pipeline integrity
+  [ "$FAILED" = "true" ] && exit 1
+  exit 0
+}
+
+[ "$1" = "fail" ] && FAILED='true'
+
+# Don't report successes on master branch
+if [ "$FAILED" != 'true' ] && [ "$BRANCH" = 'master' ]; then
+  echo "Not reporting build success because branch == 'master'"
+  exit 0
+fi
+
+echo "Notifying results via slack. FAILED: ${FAILED}"
+
+SHA="$(git log --graph --pretty=format:'%H:%d' \
+  | grep ${BRANCH} \
+  | cut -d ':' -f 1 \
+  | sed -e 's|\*\s||g')"
+MR_ID="$(git ls-remote \
+  | grep 'refs/merge-requests' \
+  | grep ${SHA} \
+  | awk '{ print $2 }' \
+  | sed -e 's|refs/merge-requests/||g' \
+  | sed -e 's|/head||g')"
+
+# if there is not a merge request associated with this build,
+# then don't report the results
+echo "Merge Request ID for this build:  '${MR_ID}'"
+[ -n "$MR_ID" ] || peace_out
+
+# Can remove this manual title check once upgraded to gitlab 10.8
+# (this variable will be pre-populated by gitlab)
+CI_COMMIT_TITLE="$(git log --pretty=format:%s -1)"
+
+AUTHOR="$(git log --pretty=format:%an -1)"
+
+# line break to make it easier to read the log
+echo
+
+curl \
+  --data "api_token=${API_TOKEN}" \
+  --data "user=${GITLAB_USER_EMAIL}" \
+  --data "author=${AUTHOR}" \
+  --data "branch=${BRANCH}" \
+  --data "failed=${FAILED}" \
+  --data "title=${CI_COMMIT_TITLE}" \
+  --data "pipeline_id=${CI_PIPELINE_ID}" \
+  --data "job_id=${CI_JOB_ID}" \
+  --data "project_url=${CI_PROJECT_URL}" \
+  --data "mr_id=${MR_ID}" \" \
+  'https://slack-proxy3.herokuapp.com/build_proxies/<%= @build_proxy.id %>/buildcomplete'
+
+# line break to make it easier to read the log
+echo -e "\n"
+
+peace_out
+</pre>
+
+<p><strong>Deployment complete:</strong></p>
+
+<p>
+  A similar script can be used for deployment notifications:
+</p>
+
+<pre>
+#!/usr/bin/env sh
+
+API_TOKEN='<%= @build_proxy.api_token %>'
+
+BRANCH="${CI_COMMIT_REF_NAME}"
+ENVIRONMENT="${CI_ENVIRONMENT_NAME}"
+
+FAILED='false'
+[ "$1" = "fail" ] && FAILED='true'
+
+# Don't report successes on non-interesting environments
+if [ "$ENVIRONMENT" != 'integ' ] && [ "$ENVIRONMENT" != 'stage' ] && [ "$ENVIRONMENT" != 'prod' ] && [ "$ENVIRONMENT" != 'production' ]; then
+  echo "Not reporting deploy success because environment is not integ, stage, or prod"
+  exit 0
+fi
+
+echo "Notifying results via slack. FAILED: ${FAILED}"
+
+# Can remove this manual title check once upgraded to gitlab 10.8
+# (this variable will be pre-populated by gitlab)
+CI_COMMIT_TITLE="$(git log --pretty=format:%s -1)"
+
+AUTHOR="$(git log --pretty=format:%an -1)"
+
+# line break to make it easier to read the log
+echo
+
+curl \
+  --data "api_token=${API_TOKEN}" \
+  --data "user=${GITLAB_USER_EMAIL}" \
+  --data "author=${AUTHOR}" \
+  --data "branch=${BRANCH}" \
+  --data "failed=${FAILED}" \
+  --data "title=${CI_COMMIT_TITLE}" \
+  --data "pipeline_id=${CI_PIPELINE_ID}" \
+  --data "job_id=${CI_JOB_ID}" \
+  --data "project_url=${CI_PROJECT_URL}" \
+  --data "environment=${ENVIRONMENT}" \
+  'https://slack-proxy3.herokuapp.com/build_proxies/<%= @build_proxy.id %>/deploycomplete'
+
+# line break to make it easier to read the log
+echo -e "\n"
+
+# make exit status match pass/fail results to maintain pipeline integrity
+[ "$FAILED" = "true" ] && exit 1
+exit 0
+</pre>
+
+<%= if @current_user.is_admin do %>
+  <span><%= link "Edit", to: build_proxy_path(@conn, :edit, @build_proxy) %></span>
+<% end %>
+<span><%= link "Back", to: build_proxy_path(@conn, :index) %></span>

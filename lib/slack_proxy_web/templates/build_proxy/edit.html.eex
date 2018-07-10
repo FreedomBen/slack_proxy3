@@ -1,0 +1,5 @@
+<h2>Edit Build proxy</h2>
+
+<%= render "form.html", Map.put(assigns, :action, build_proxy_path(@conn, :update, @build_proxy)) %>
+
+<span><%= link "Back", to: build_proxy_path(@conn, :index) %></span>

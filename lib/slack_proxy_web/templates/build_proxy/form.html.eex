@@ -1,0 +1,53 @@
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= label f, :avatar, class: "control-label" %>
+    <%= text_input f, :avatar, class: "form-control" %>
+    <%= error_tag f, :avatar %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :channel, class: "control-label" %>
+    <%= text_input f, :channel, class: "form-control" %>
+    <%= error_tag f, :channel %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :username, class: "control-label" %>
+    <%= text_input f, :username, class: "form-control" %>
+    <%= error_tag f, :username %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :disabled, class: "control-label" %>
+    <%= checkbox f, :disabled, class: "checkbox" %>
+    <%= error_tag f, :disabled %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :api_token, class: "control-label" %>
+    <%= text_input f, :api_token, class: "form-control" %>
+    <%= error_tag f, :api_token %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :abbreviate, class: "control-label" %>
+    <%= checkbox f, :abbreviate, class: "checkbox" %>
+    <%= error_tag f, :abbreviate %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :service_base_url, class: "control-label" %>
+    <%= text_input f, :service_base_url, class: "form-control" %>
+    <%= error_tag f, :service_base_url %>
+  </div>
+
+  <div class="form-group">
+    <%= submit "Submit", class: "btn btn-primary" %>
+  </div>
+<% end %>

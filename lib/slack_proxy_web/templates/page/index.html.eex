@@ -1,0 +1,12 @@
+<div class="center">
+  <%= if @current_user do %>
+    Slack Bots:
+  <% else %>
+    <p>
+      Please <%= link "log in", to: Routes.session_path(@conn, :new) %> to continue!
+    </p>
+    <p>
+      If you need an account, please contact an administrator.
+    </p>
+  <% end %>
+</div>
