@@ -8,6 +8,12 @@ Start up postgres.  There's a script to make it easy for you, but you can use wh
 ./scripts/start-postgres.sh
 ```
 
+If you would like a `psql` prompt on that database, use the script:
+
+```sh
+./scripts/psql.sh
+```
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
