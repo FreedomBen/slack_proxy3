@@ -34,15 +34,19 @@ Pages are server-side rendered using eex (embedded elixir).  Sessions are stored
 
 ### Users
 
+```
 name:
 username:
 is_admin: only admins can change things, and add new users
+```
 
 ### Credentials
 
+```
 email:
 password: (Virtual, doesn't get saved.  gets hashed and savedi n password_hash)
 user_id: to tie to the user
+```
 
 ### Sessions
 
@@ -50,7 +54,9 @@ No db table.  These live in cookies inside the browser.
 
 ### Build Proxies
 
+```
 avatar: Avatar to post to slack with
 channel: Channel to post to
 username: username to post with
 service_base_url: used for generating links to the merge request
+```
