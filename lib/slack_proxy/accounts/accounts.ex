@@ -46,8 +46,13 @@ defmodule SlackProxy.Accounts do
     end
   end
 
-  def update_user(%User{} = user, attrs, is_self: is_self) do
-    update_user(user, attrs, is_self: is_self, is_admin: user.is_admin)
+  def update_user(%User{} = user, attrs, updating_user: updating_user) do
+    update_user(
+      user,
+      attrs,
+      is_self: (user.id == updating_user.id),
+      is_admin: updating_user.is_admin
+    )
   end
 
   def update_user(%User{} = user, attrs, is_self: _, is_admin: true) do

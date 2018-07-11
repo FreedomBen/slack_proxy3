@@ -45,7 +45,7 @@ defmodule SlackProxyWeb.UserController do
     user_params = restrict_password_change_to_owner(conn, id, user_params)
     user = Accounts.get_user(id)
 
-    case Accounts.update_user(user, user_params, is_self: user_is_updating_self?(conn, id)) do
+    case Accounts.update_user(user, user_params, updating_user: conn.assigns.current_user) do
       {:ok, user} ->
         conn
         |> put_flash(:info, "User updated successfully.")
